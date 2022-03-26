@@ -101,7 +101,7 @@ func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 		}, "canonicals")
 	})
 	if err != nil {
-		logrus.Debug("Error calling Amputator API, response: ", string(body))
+		err = fmt.Errorf("error parsing Amputator API: %v, response body: %v", err, string(body))
 		return nil, err
 	}
 
