@@ -12,10 +12,54 @@ import (
 const (
 	amputatorApi string = "https://www.amputatorbot.com/api/v1"
 	userAgent    string = "github.com/tyzbit/go-amputate"
+	gac          string = "true"
+	md           string = "3"
 )
 
+// _fillOptionsDefaults takes AmputationRequestOptions and fills in defaults
+func _fillOptionsDefaults(o map[string]string) {
+	if o["gac"] == "" {
+		o["gac"] = gac
+	}
+	if o["gac"] == "" {
+		o["gac"] = md
+	}
+}
+
+// Amputate takes a slice of strings of URLs and returns the amputated versions
+// of the URLs. Not guaranteed to return the same number of values.
+//
+// Current options:
+// gac: Guess and Check, if the canonical URL can't be determined, try guessing
+// md: Max depth to follow links in order to determine canonical URL
+func (bot AmputatorBot) Amputate(urls []string, o map[string]string) ([]string, error) {
+	_fillOptionsDefaults(o)
+	ampRequest := AmputationRequest{
+		options: o,
+		urls:    urls,
+	}
+	ampResponse, err := bot.Convert(ampRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	ampUrls, err := bot.GetCanonicalUrls(ampResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return ampUrls, nil
+}
+
+// Convert takes an AmputationRequest and returns a byte slice of the response
+// from the AmputatorAPI. External callers should probably use Amputate()
+// instead.
 func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
-	url := fmt.Sprintf("%v/convert?gac=%v&md=%v&q=%v", amputatorApi, r.gac, r.md, strings.Join(r.urls, ";"))
+	options := ""
+	for option, value := range r.options {
+		options = fmt.Sprintf("%v=%v", option, value)
+	}
+	url := fmt.Sprintf("%v/convert?%v&q=%v", amputatorApi, options, strings.Join(r.urls, ";"))
 	method := "GET"
 
 	client := &http.Client{}
@@ -38,7 +82,9 @@ func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
 	return body, nil
 }
 
-func GetCanonicalUrls(body []byte) ([]string, error) {
+// GetCanonicalUrls takes a byte slice of an Amputator API return object and
+// returns a slice of strings of unique non_amp URLs.
+func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 	urls := []string{}
 	_, err := jsonparser.ArrayEach(body, func(amputateObject []byte, dataType jsonparser.ValueType, offset int, err error) {
 		jsonparser.ArrayEach(amputateObject, func(canonical []byte, dataType jsonparser.ValueType, offset int, err error) {

@@ -1,9 +1,8 @@
 package goamputate
 
 type AmputationRequest struct {
-	gac  bool
-	md   int
-	urls []string
+	options map[string]string
+	urls    []string
 }
 
 type AmputatorBot struct{}
