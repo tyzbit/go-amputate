@@ -127,7 +127,7 @@ func TestAmputate(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(urls, expectedUrls) {
-		t.Errorf("Amoutate did not return expected URL. Received: %v Expected: %v", urls, expectedUrls)
+		t.Errorf("Amputate did not return expected URL. Received: %v Expected: %v", urls, expectedUrls)
 		os.Exit(1)
 	}
 }

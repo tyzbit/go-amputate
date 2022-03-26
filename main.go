@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/buger/jsonparser"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,6 +16,10 @@ const (
 	gac          string = "true"
 	md           string = "3"
 )
+
+func init() {
+	logrus.SetLevel(logrus.DebugLevel)
+}
 
 // _fillOptionsDefaults takes AmputationRequestOptions and fills in defaults
 func _fillOptionsDefaults(o map[string]string) {
@@ -96,6 +101,7 @@ func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 		}, "canonicals")
 	})
 	if err != nil {
+		logrus.Debug("Error calling Amputator API, response: ", string(body))
 		return nil, err
 	}
 
