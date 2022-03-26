@@ -1,0 +1,25 @@
+name: uttest
+
+on:
+
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+
+jobs:
+
+  test:
+    name: Run Unit Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+           go-version: '1.18.0'      
+      - name: Run Unit test cases
+        run: go test -v ./...
