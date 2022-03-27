@@ -91,16 +91,31 @@ func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
 // returns a slice of strings of unique non_amp URLs.
 func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 	urls := []string{}
+	var extraError error
 	_, err := jsonparser.ArrayEach(body, func(amputateObject []byte, dataType jsonparser.ValueType, offset int, err error) {
-		jsonparser.ArrayEach(amputateObject, func(canonical []byte, dataType jsonparser.ValueType, offset int, err error) {
-			if is_amp, _ := jsonparser.GetBoolean(canonical, "is_amp"); !is_amp {
-				if url, _ := jsonparser.GetString(canonical, "url"); url != "" {
+		_, arrayErr := jsonparser.ArrayEach(amputateObject, func(canonical []byte, dataType jsonparser.ValueType, offset int, err error) {
+			isAmp, boolErr := jsonparser.GetBoolean(canonical, "is_amp")
+			if isAmp {
+				url, stringErr := jsonparser.GetString(canonical, "url")
+				if url != "" {
 					urls = append(urls, url)
 				}
+				if stringErr != nil {
+					extraError = stringErr
+				}
+			}
+			if boolErr != nil {
+				extraError = boolErr
 			}
 		}, "canonicals")
+		if arrayErr != nil {
+			extraError = arrayErr
+		}
 	})
 	if err != nil {
+		if extraError != nil {
+			err = fmt.Errorf("%v, more info: %v", err, extraError)
+		}
 		err = fmt.Errorf("error parsing Amputator API: %v, response body: %v", err, string(body))
 		return nil, err
 	}
