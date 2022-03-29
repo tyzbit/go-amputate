@@ -1,12 +1,12 @@
 package goamputate
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/buger/jsonparser"
 	"github.com/sirupsen/logrus"
 )
 
@@ -91,18 +91,19 @@ func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
 // returns a slice of strings of unique non_amp URLs.
 func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 	urls := []string{}
-	_, err := jsonparser.ArrayEach(body, func(amputateObject []byte, dataType jsonparser.ValueType, offset int, err error) {
-		jsonparser.ArrayEach(amputateObject, func(canonical []byte, dataType jsonparser.ValueType, offset int, err error) {
-			if isAmp, _ := jsonparser.GetBoolean(canonical, "is_amp"); !isAmp {
-				if url, _ := jsonparser.GetString(canonical, "url"); url != "" {
-					urls = append(urls, url)
-				}
-			}
-		}, "canonicals")
-	})
+
+	ampResponse := []AmputationObject{}
+	err := json.Unmarshal([]byte(body), &ampResponse)
 	if err != nil {
-		err = fmt.Errorf("error parsing Amputator API: %v, response body: %v", err, string(body))
-		return nil, err
+		return nil, fmt.Errorf("unable to unmarshal json: %v, err: %v", string(body), err)
+	}
+
+	for _, ampObject := range ampResponse {
+		for _, canonical := range ampObject.Canonicals {
+			if !canonical.IsAmp {
+				urls = append(urls, canonical.Url)
+			}
+		}
 	}
 
 	uniqueUrls := _removeDuplicateValues(urls)
