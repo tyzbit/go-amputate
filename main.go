@@ -21,8 +21,8 @@ func init() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
-// _fillOptionsDefaults takes AmputationRequestOptions and fills in defaults
-func _fillOptionsDefaults(o map[string]string) {
+// fillOptionsDefaults takes AmputationRequestOptions and fills in defaults
+func fillOptionsDefaults(o map[string]string) {
 	if o["gac"] == "" {
 		o["gac"] = gac
 	}
@@ -38,7 +38,7 @@ func _fillOptionsDefaults(o map[string]string) {
 // gac: Guess and Check, if the canonical URL can't be determined, try guessing
 // md: Max depth to follow links in order to determine canonical URL
 func (bot AmputatorBot) Amputate(urls []string, o map[string]string) ([]string, error) {
-	_fillOptionsDefaults(o)
+	fillOptionsDefaults(o)
 	ampRequest := AmputationRequest{
 		options: o,
 		urls:    urls,
@@ -106,11 +106,11 @@ func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
 		}
 	}
 
-	uniqueUrls := _removeDuplicateValues(urls)
+	uniqueUrls := removeDuplicateValues(urls)
 	return uniqueUrls, nil
 }
 
-func _removeDuplicateValues(strings []string) []string {
+func removeDuplicateValues(strings []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
 
