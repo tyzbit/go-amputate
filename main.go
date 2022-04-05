@@ -37,18 +37,18 @@ func fillOptionsDefaults(o map[string]string) {
 // Current options:
 // gac: Guess and Check, if the canonical URL can't be determined, try guessing
 // md: Max depth to follow links in order to determine canonical URL
-func (bot AmputatorBot) Amputate(urls []string, o map[string]string) ([]string, error) {
+func Amputate(urls []string, o map[string]string) ([]string, error) {
 	fillOptionsDefaults(o)
 	ampRequest := AmputationRequest{
 		options: o,
 		urls:    urls,
 	}
-	ampResponse, err := bot.Convert(ampRequest)
+	ampResponse, err := Convert(ampRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	ampUrls, err := bot.GetCanonicalUrls(ampResponse)
+	ampUrls, err := GetCanonicalUrls(ampResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (bot AmputatorBot) Amputate(urls []string, o map[string]string) ([]string, 
 // Convert takes an AmputationRequest and returns a byte slice of the response
 // from the AmputatorAPI. External callers should probably use Amputate()
 // instead.
-func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
+func Convert(r AmputationRequest) ([]byte, error) {
 	options := ""
 	for option, value := range r.options {
 		options = fmt.Sprintf("%v=%v", option, value)
@@ -89,10 +89,10 @@ func (AmputatorBot) Convert(r AmputationRequest) ([]byte, error) {
 
 // GetCanonicalUrls takes a byte slice of an Amputator API return object and
 // returns a slice of strings of unique non_amp URLs.
-func (AmputatorBot) GetCanonicalUrls(body []byte) ([]string, error) {
+func GetCanonicalUrls(body []byte) ([]string, error) {
 	urls := []string{}
 
-	ampResponse := []AmputationObject{}
+	ampResponse := []AmputationResponseObject{}
 	err := json.Unmarshal([]byte(body), &ampResponse)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal json: %v, err: %v", string(body), err)

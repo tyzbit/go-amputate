@@ -120,8 +120,7 @@ var mockedAmpResponse = []byte(
 ]`)
 
 func TestAmputate(t *testing.T) {
-	var bot AmputatorBot
-	urls, err := bot.Amputate([]string{unAmpedUrl}, map[string]string{})
+	urls, err := Amputate([]string{unAmpedUrl}, map[string]string{})
 	if err != nil {
 		t.Errorf("Unable to Amputate: %v", err)
 	}
@@ -140,8 +139,7 @@ func TestConvert(t *testing.T) {
 		},
 		urls: []string{unAmpedUrl},
 	}
-	var bot AmputatorBot
-	response, err := bot.Convert(request)
+	response, err := Convert(request)
 	if err != nil {
 		t.Errorf("Error calling Convert: %v", err)
 		os.Exit(1)
@@ -150,9 +148,7 @@ func TestConvert(t *testing.T) {
 }
 
 func TestGetCanonicalUrls(t *testing.T) {
-
-	var bot AmputatorBot
-	urls, err := bot.GetCanonicalUrls(mockedAmpResponse)
+	urls, err := GetCanonicalUrls(mockedAmpResponse)
 	if err != nil {
 		t.Errorf("Unable to GetCanonicalUrls: %v", err)
 		os.Exit(1)

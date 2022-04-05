@@ -9,7 +9,7 @@ type AmputationRequest struct {
 // An instance of the AmputatorBot
 type AmputatorBot struct{}
 
-type AmputationObject struct {
+type AmputationResponseObject struct {
 	AmpCanonical Canonical   `json:"amp_canonical"`
 	Canonical    Canonical   `json:"canonical"`
 	Canonicals   []Canonical `json:"canonicals"`
